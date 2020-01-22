@@ -1,0 +1,150 @@
+version: "3.5"
+
+services:
+  # 运行一个name server
+  namesrv1:
+    build:
+      context: .
+      dockerfile: rocketmq-namesrv.dockerfile
+    image: rocketmq-namesrv/4.6.0
+    container_name: namesrv1
+    restart: always
+    networks:
+      rocketmq-dledger:
+    ports:
+      - 9876:9876
+
+  # 运行一个rocketmq控制台服务
+  console:
+    image: styletang/rocketmq-console-ng
+    container_name: console
+    depends_on:
+      - namesrv1
+    environment:
+      - JAVA_OPTS= -Dlogging.level.root=info   -Drocketmq.namesrv.addr=namesrv1:9876
+      - Dcom.rocketmq.sendMessageWithVIPChannel=false
+    networks:
+      rocketmq-dledger:
+    ports:
+      - 8087:8080
+
+  # broker0
+
+  broker0-n0:
+    build:
+      context: .
+      dockerfile: rocketmq-broker.dockerfile
+    image: rocketmq-broker/4.6.0
+    depends_on:
+      - namesrv1
+    container_name: broker0n0
+    restart: always
+    networks:
+      rocketmq-dledger:
+    volumes:
+      - ./broker-conf/broker0-n0.conf:/app/data/conf/broker.conf
+      - ./store/broker0n0:/app/data/store
+    ports:
+      - 10909:10909
+      - 10911:10911
+      - 10912:10912
+
+  broker0-n1:
+    build:
+      context: .
+      dockerfile: rocketmq-broker.dockerfile
+    image: rocketmq-broker/4.6.0
+    depends_on:
+      - namesrv1
+    container_name: broker0n1
+    restart: always
+    networks:
+      rocketmq-dledger:
+    volumes:
+      - ./broker-conf/broker0-n1.conf:/app/data/conf/broker.conf
+      - ./store/broker0n1:/app/data/store
+    ports:
+      - 11909:11909
+      - 11911:11911
+      - 11912:11912
+
+  broker0-n2:
+    build:
+      context: .
+      dockerfile: rocketmq-broker.dockerfile
+    image: rocketmq-broker/4.6.0
+    depends_on:
+      - namesrv1
+    container_name: broker0n2
+    restart: always
+    networks:
+      rocketmq-dledger:
+    volumes:
+      - ./broker-conf/broker0-n2.conf:/app/data/conf/broker.conf
+      - ./store/broker0n2:/app/data/store
+    ports:
+      - 12909:12909
+      - 12911:12911
+      - 12912:12912
+
+  # broker1
+
+  # broker1-n0:
+  #   build:
+  #     context: .
+  #     dockerfile: rocketmq-broker.dockerfile
+  #   image: rocketmq-broker/4.6.0
+  #   depends_on:
+  #     - namesrv1
+  #   container_name: broker1n0
+  #   restart: always
+  #   networks:
+  #     rocketmq-dledger:
+  #   volumes:
+  #     - ./broker-conf/broker1-n0.conf:/app/data/conf/broker.conf
+  #     - ./store/broker1n0:/app/data/store
+  #   ports:
+  #     - 20909:20909
+  #     - 20911:20911
+  #     - 20912:20912
+
+  # broker1-n1:
+  #   build:
+  #     context: .
+  #     dockerfile: rocketmq-broker.dockerfile
+  #   image: rocketmq-broker/4.6.0
+  #   depends_on:
+  #     - namesrv1
+  #   container_name: broker1n1
+  #   restart: always
+  #   networks:
+  #     rocketmq-dledger:
+  #   volumes:
+  #     - ./broker-conf/broker1-n1.conf:/app/data/conf/broker.conf
+  #     - ./store/broker1n1:/app/data/store
+  #   ports:
+  #     - 21909:21909
+  #     - 21911:21911
+  #     - 21912:21912
+
+  # broker1-n2:
+  #   build:
+  #     context: .
+  #     dockerfile: rocketmq-broker.dockerfile
+  #   image: rocketmq-broker/4.6.0
+  #   depends_on:
+  #     - namesrv1
+  #   container_name: broker1n2
+  #   restart: always
+  #   networks:
+  #     rocketmq-dledger:
+  #   volumes:
+  #     - ./broker-conf/broker1-n2.conf:/app/data/conf/broker.conf
+  #     - ./store/broker1n2:/app/data/store
+  #   ports:
+  #     - 22909:22909
+  #     - 22911:22911
+  #     - 22912:22912
+
+networks:
+  rocketmq-dledger:
